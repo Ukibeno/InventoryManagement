@@ -1,5 +1,6 @@
 package InventoryManagement.product;
 
+import InventoryManagement.dto.ProductCreationRequestDto;
 import InventoryManagement.dto.ProductDto;
 import InventoryManagement.product.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    /**
-     * Get all products.
-     * Accessible by both ADMIN and MANAGER roles.
-     *
-     * @return ResponseEntity containing the list of ProductDto.
-     */
+
     @PreAuthorize("hasAnyAuthority('admin:read', 'management:read')")
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts() {
@@ -29,27 +25,13 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    /**
-     * Create a new product.
-     * Accessible only by ADMIN role.
-     *
-     * @param productDto the product data.
-     * @return ResponseEntity containing the created ProductDto.
-     */
     @PreAuthorize("hasAuthority('admin:create')")
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
-        ProductDto createdProduct = productService.createProduct(productDto);
+    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductCreationRequestDto productCreationRequestDto) {
+        ProductDto createdProduct = productService.createProduct(productCreationRequestDto);
         return ResponseEntity.ok(createdProduct);
     }
 
-    /**
-     * Get product by ID.
-     * Accessible by both ADMIN and MANAGER roles.
-     *
-     * @param id the ID of the product.
-     * @return ResponseEntity containing the ProductDto.
-     */
     @PreAuthorize("hasAnyAuthority('admin:read', 'management:read')")
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable Long id) {
@@ -57,28 +39,13 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
 
-    /**
-     * Update an existing product.
-     * Accessible only by ADMIN role.
-     *
-     * @param id the ID of the product to update.
-     * @param productDto the updated product data.
-     * @return ResponseEntity containing the updated ProductDto.
-     */
     @PreAuthorize("hasAuthority('admin:update')")
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id, @RequestBody ProductDto productDto) {
-        ProductDto updatedProduct = productService.updateProduct(id, productDto);
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id, @RequestBody ProductCreationRequestDto productCreationRequestDto) {
+        ProductDto updatedProduct = productService.updateProduct(id, productCreationRequestDto);
         return ResponseEntity.ok(updatedProduct);
     }
 
-    /**
-     * Delete a product by ID.
-     * Accessible only by ADMIN role.
-     *
-     * @param id the ID of the product to delete.
-     * @return ResponseEntity with no content.
-     */
     @PreAuthorize("hasAuthority('admin:delete')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
@@ -86,13 +53,7 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Search for products by query.
-     * Accessible by both ADMIN and MANAGER roles.
-     *
-     * @param query the search query.
-     * @return ResponseEntity containing the list of ProductDto.
-     */
+
     @PreAuthorize("hasAnyAuthority('admin:read', 'management:read')")
     @GetMapping("/search")
     public ResponseEntity<List<ProductDto>> searchProducts(@RequestParam String query) {
@@ -100,17 +61,6 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    /**
-     * Filter products based on criteria.
-     * Accessible by both ADMIN and MANAGER roles.
-     *
-     * @param category the category filter.
-     * @param minPrice the minimum price filter.
-     * @param maxPrice the maximum price filter.
-     * @param sortBy the sorting criteria.
-     * @param order the sorting order.
-     * @return ResponseEntity containing the list of ProductDto.
-     */
     @PreAuthorize("hasAnyAuthority('admin:read', 'management:read')")
     @GetMapping("/filter")
     public ResponseEntity<List<ProductDto>> filterProducts(

@@ -14,9 +14,10 @@ public interface SupplierService {
 
    // SupplierDto createSupplier(SupplierSignupRequestDto supplierSignupRequestDto);
 
-    SupplierDto updateSupplier(Long id, SupplierDto supplierDto);
+    SupplierDto updateSupplier(Long id, SupplierSignupRequestDto supplierSignupRequestDto);
 
-    void approveSupplier(Long supplierId);
+    void approveSupplier(Long id);
+    void rejectSupplier(Long id);
 
     void deleteSupplier(Long supplierId);
 

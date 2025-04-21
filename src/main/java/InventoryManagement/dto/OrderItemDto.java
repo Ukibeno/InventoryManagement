@@ -5,11 +5,13 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemDto {
-    private Long id;               // For identifying an existing item (for updates)
-    private Long productId;        // Refers to the Product's ID, so you can fetch the actual Product entity
-    private int quantity;          // Quantity of the product in this order item
-    private BigDecimal price;      // The price of the product
+    private  String productCode;
+    private String productName;
+    private int quantity;
+    private BigDecimal price;
 }

@@ -5,5 +5,8 @@ public enum Status {
     EDITED,    // Admin has edited the order
     APPROVED,
     REJECTED,
+     ACTIVE,
+
+    INACTIVE,
     COMPLETED     // Order has been completed.
 }

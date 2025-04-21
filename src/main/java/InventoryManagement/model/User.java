@@ -3,11 +3,12 @@ package InventoryManagement.model;
 import InventoryManagement.token.Token;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Collection;
 import java.util.List;
 
-@Builder
+@SuperBuilder
 @Entity
 @Getter
 @Setter
@@ -34,10 +35,7 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
-
-   // @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    //private Supplier supplierDetails;
+    private Status status = Status.ACTIVE;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -51,6 +49,7 @@ public class User extends BaseEntity {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.status = Status.ACTIVE;
     }
 
 

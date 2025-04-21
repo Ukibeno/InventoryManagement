@@ -35,7 +35,6 @@ public class SupplierServiceImpl implements SupplierService {
                 .map(supplierMapper::toDto)
                 .toList();
     }
-
     @Override
     @Transactional(readOnly = true)
     public SupplierDto getSupplierById(Long id) {
@@ -43,9 +42,9 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public SupplierDto updateSupplier(Long id, SupplierDto dto) {
+    public SupplierDto updateSupplier(Long id, SupplierSignupRequestDto dto) {
         Supplier supplier = findSupplierById(id);
-        Category category = findCategoryById(dto.getCategoryDto().getId());
+        Category category = findCategoryById(dto.getCategoryCreationRequestDto().getId());
 
         supplier.setFirstName(dto.getFirstName());
         supplier.setLastName(dto.getLastName());
@@ -55,18 +54,19 @@ public class SupplierServiceImpl implements SupplierService {
         return supplierMapper.toDto(supplierRepository.save(supplier));
     }
 
-    @Override
-    public void approveSupplier(Long supplierId) {
-        Supplier supplier = findSupplierById(supplierId);
-
-        if (supplier.getStatus() == Status.APPROVED) {
-            throw new RuntimeException("Supplier is already approved.");
-        }
-
-        supplier.setStatus(Status.APPROVED);
+    public void approveSupplier(Long id) {
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+        supplier.setStatus(Status.ACTIVE);
         supplierRepository.save(supplier);
     }
 
+    public void rejectSupplier(Long id) {
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+        supplier.setStatus(Status.REJECTED);
+        supplierRepository.save(supplier);
+    }
     @Override
     public void deleteSupplier(Long supplierId) {
         Supplier supplier = findSupplierById(supplierId);

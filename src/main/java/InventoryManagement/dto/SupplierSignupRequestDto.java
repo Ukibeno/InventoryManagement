@@ -27,5 +27,5 @@ public class SupplierSignupRequestDto {
     @NotBlank
     private Status status;
     @NotBlank
-    private CategoryDto categoryDto;
+    private CategoryCreationRequestDto categoryCreationRequestDto;
 }

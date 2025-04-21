@@ -1,6 +1,7 @@
 package InventoryManagement.mapper;
 
 
+import InventoryManagement.dto.ProductCreationRequestDto;
 import InventoryManagement.dto.ProductDto;
 import InventoryManagement.model.Product;
 import org.mapstruct.Mapper;
@@ -13,6 +14,6 @@ public interface ProductMapper {
  ProductDto productToDto(Product product);
 
  @Mapping(source = "categoryDto", target = "category")
- Product productDtoToEntity(ProductDto productDto);
+ Product productDtoToEntity(ProductCreationRequestDto productCreationRequestDto);
 
 }

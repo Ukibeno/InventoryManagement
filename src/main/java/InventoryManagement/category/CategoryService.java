@@ -1,6 +1,7 @@
 package InventoryManagement.category;
 
 
+import InventoryManagement.dto.CategoryCreationRequestDto;
 import InventoryManagement.dto.CategoryDto;
 
 import java.util.List;
@@ -10,8 +11,8 @@ public interface CategoryService {
 
     CategoryDto getCategoryById(Integer id);
 
-    CategoryDto createCategory(CategoryDto categoryDto);
+    CategoryDto createCategory(CategoryCreationRequestDto categoryCreationRequestDto);
 
-    CategoryDto updateCategory(Integer id, CategoryDto categoryDto);
+    CategoryDto updateCategory(Integer id, CategoryCreationRequestDto categoryCreationRequestDto);
     void deleteCategory(Integer id);
 }

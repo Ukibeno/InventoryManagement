@@ -55,13 +55,10 @@ public class UserController {
     @PreAuthorize("hasAuthority('admin:read')")
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
+
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    /**
-     * Get user by ID.
-     * Accessible by ADMIN with read authority.
-     */
     @PreAuthorize("hasAuthority('admin:read')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {

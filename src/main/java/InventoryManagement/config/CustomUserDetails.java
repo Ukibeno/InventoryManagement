@@ -56,7 +56,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getStatus() == Status.APPROVED;  // Or whatever status you're using to mark an active account
+        return user.getStatus() == Status.ACTIVE;  // Or whatever status you're using to mark an active account
     }
 
     // Optionally add access to the underlying User entity if needed

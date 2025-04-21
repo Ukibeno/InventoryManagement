@@ -1,6 +1,7 @@
 package InventoryManagement.product.impl;
 
 
+import InventoryManagement.dto.ProductCreationRequestDto;
 import InventoryManagement.repository.category.CategoryRepository;
 import InventoryManagement.dto.ProductDto;
 import InventoryManagement.exception.ProductNotFoundException;
@@ -20,34 +21,37 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    private final ProductRepository adminProductRepository;
-    private final CategoryRepository adminCategoryRepository;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
 
     @Override
     public List<ProductDto> getAllProducts() {
-        return adminProductRepository.findAll().stream()
+        return productRepository.findAll().stream()
                 .map(productMapper::productToDto)
                 .collect(Collectors.toList());
     }
-@Override
-    public ProductDto createProduct(ProductDto productDTO) {
-        if (productDTO.getCategoryDto() == null || productDTO.getCategoryDto().getId() == null) {
-            throw new IllegalArgumentException("Product category must not be null");
+    @Override
+    public ProductDto createProduct(ProductCreationRequestDto productCreationRequestDto) {
+        if (productCreationRequestDto.getCategoryDto() == null ||
+                productCreationRequestDto.getCategoryDto().getName() == null ||
+                productCreationRequestDto.getCategoryDto().getName().isBlank()) {
+            throw new IllegalArgumentException("Product category name must not be null or blank");
         }
 
-        Category existingCategory = adminCategoryRepository.findById(productDTO.getCategoryDto().getId())
+        Category existingCategory = categoryRepository.findByName(productCreationRequestDto.getCategoryDto().getName())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        Product product = productMapper.productDtoToEntity(productDTO);
+        Product product = productMapper.productDtoToEntity(productCreationRequestDto);
         product.setCategory(existingCategory);
 
-        Product savedProduct = adminProductRepository.save(product);
+        Product savedProduct = productRepository.save(product);
         return productMapper.productToDto(savedProduct);
     }
+
 @Override
     public ProductDto getProductById(Long id) {
-        Product product = adminProductRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + id));
 
         return productMapper.productToDto(product);
@@ -55,36 +59,43 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Long id) {
-        adminProductRepository.deleteById(id);
+        productRepository.deleteById(id);
     }
 @Override
     public Optional<ProductDto> getProductByName(String name) {
-        return adminProductRepository.findByName(name)
+        return productRepository.findByName(name)
                 .map(productMapper::productToDto);
     }
 
     @Override
-    public ProductDto updateProduct(Long id, ProductDto productDTO) {
-        Product product = adminProductRepository.findById(id)
+    public ProductDto updateProduct(Long productId, ProductCreationRequestDto productCreationRequestDto) {
+        Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
-        product.setPrice(productDTO.getPrice());
-        product.setQuantity(productDTO.getQuantity());
-
-        if (productDTO.getCategoryDto() != null) {
-            Category category = adminCategoryRepository.findById(productDTO.getCategoryDto().getId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            product.setCategory(category);
+        // If categoryDto or name inside it is missing, throw error
+        if (productCreationRequestDto.getCategoryDto() == null ||
+                productCreationRequestDto.getCategoryDto().getName() == null ||
+                productCreationRequestDto.getCategoryDto().getName().isBlank()) {
+            throw new IllegalArgumentException("Product category name must not be null or blank");
         }
 
-        Product updatedProduct = adminProductRepository.save(product);
+        // Find category by name
+        Category existingCategory = categoryRepository.findByName(productCreationRequestDto.getCategoryDto().getName())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        // Update fields
+        existingProduct.setName(productCreationRequestDto.getName());
+        existingProduct.setDescription(productCreationRequestDto.getDescription());
+        existingProduct.setPrice(productCreationRequestDto.getPrice());
+        existingProduct.setCategory(existingCategory);
+        existingProduct.setQuantity(productCreationRequestDto.getQuantity());
+        Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.productToDto(updatedProduct);
     }
+
     @Override
     public List<ProductDto> filterProducts(String category, Double minPrice, Double maxPrice, String sortBy, String order) {
-        List<Product> products = adminProductRepository.filterProducts(category, minPrice, maxPrice);
+        List<Product> products = productRepository.filterProducts(category, minPrice, maxPrice);
 
         return products.stream()
                 .sorted((p1, p2) -> {
@@ -110,7 +121,7 @@ public class ProductServiceImpl implements ProductService {
 
 @Override
     public List<ProductDto> searchProducts(String query) {
-        return adminProductRepository.findByNameContainingIgnoreCase(query).stream()
+        return productRepository.findByNameContainingIgnoreCase(query).stream()
                 .map(productMapper::productToDto)
                 .collect(Collectors.toList());
     }

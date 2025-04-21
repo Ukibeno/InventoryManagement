@@ -28,7 +28,8 @@ public class AdminSignupRequestDto {
     private String contact;
     @NotBlank
     private String address;
-
+    @NotBlank
+    private Status status;
     @NotBlank
     private Role role;
 

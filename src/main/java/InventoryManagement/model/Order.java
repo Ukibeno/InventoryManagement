@@ -4,6 +4,7 @@ import InventoryManagement.util.OrderNumberGenerator;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "orders")
 public class Order extends BaseEntity{
 
@@ -26,7 +28,7 @@ public class Order extends BaseEntity{
 
     // OrderItems serve as the detailed list of products that are low in stock.
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> orderItems = new ArrayList<>();
+    private List<OrderItem> items;
 
     // The category of product items this order concerns.
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,10 +42,14 @@ public class Order extends BaseEntity{
 
     // Order created by a Manager.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    // Auto-generate the order number if it isn't set already
+    public BigDecimal getTotal() {
+        return items.stream()
+                .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
     @PrePersist
     public void generateOrderNumber() {

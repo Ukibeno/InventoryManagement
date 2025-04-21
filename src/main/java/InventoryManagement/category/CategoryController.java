@@ -1,5 +1,6 @@
 package InventoryManagement.category;
 
+import InventoryManagement.dto.CategoryCreationRequestDto;
 import InventoryManagement.dto.CategoryDto;
 import InventoryManagement.category.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,6 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    /**
-     * Get all categories.
-     * Accessible by both ADMIN and MANAGER roles.
-     *
-     * @return ResponseEntity containing the list of CategoryDto.
-     */
     @PreAuthorize("hasAnyAuthority('admin:read', 'management:read')")
     @GetMapping
     public ResponseEntity<List<CategoryDto>> getAllCategories() {
@@ -29,13 +24,6 @@ public class CategoryController {
         return ResponseEntity.ok(categories);
     }
 
-    /**
-     * Get category by ID.
-     * Accessible by both ADMIN and MANAGER roles.
-     *
-     * @param id the ID of the category.
-     * @return ResponseEntity containing the CategoryDto.
-     */
     @PreAuthorize("hasAnyAuthority('admin:read', 'management:read')")
     @GetMapping("/{id}")
     public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Integer id) {
@@ -43,32 +31,18 @@ public class CategoryController {
         return ResponseEntity.ok(category);
     }
 
-    /**
-     * Create a new category.
-     * Accessible only by ADMIN role.
-     *
-     * @param categoryDto the category data.
-     * @return ResponseEntity containing the created CategoryDto.
-     */
     @PreAuthorize("hasAuthority('admin:create')")
     @PostMapping
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
-        CategoryDto createdCategory = categoryService.createCategory(categoryDto);
+    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryCreationRequestDto categoryCreationRequestDto) {
+        CategoryDto createdCategory = categoryService.createCategory(categoryCreationRequestDto);
         return ResponseEntity.status(201).body(createdCategory);
     }
 
-    /**
-     * Update an existing category.
-     * Accessible only by ADMIN role.
-     *
-     * @param id the ID of the category to update.
-     * @param categoryDto the updated category data.
-     * @return ResponseEntity containing the updated CategoryDto.
-     */
+
     @PreAuthorize("hasAuthority('admin:update')")
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Integer id, @RequestBody CategoryDto categoryDto) {
-        CategoryDto updatedCategory = categoryService.updateCategory(id, categoryDto);
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Integer id, @RequestBody CategoryCreationRequestDto categoryCreationRequestDto) {
+        CategoryDto updatedCategory = categoryService.updateCategory(id, categoryCreationRequestDto);
         return ResponseEntity.ok(updatedCategory);
     }
 

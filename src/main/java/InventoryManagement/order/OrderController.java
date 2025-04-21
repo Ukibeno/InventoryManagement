@@ -1,9 +1,7 @@
 package InventoryManagement.order;
 
-import InventoryManagement.dto.CategoryDto;
-import InventoryManagement.dto.OrderCreationRequest;
+import InventoryManagement.dto.OrderCreationRequestDto;
 import InventoryManagement.dto.OrderDto;
-import InventoryManagement.dto.UserDto;
 import InventoryManagement.model.User;
 import InventoryManagement.order.OrderService;
 import jakarta.validation.Valid;
@@ -24,78 +22,51 @@ public class OrderController {
 
     /**
      * Create a new order.
-     * Accessible by both ADMIN and MANAGER roles.
-     *
-     * @param request the composite request containing order number, category, and order data.
-     * @param user    the authenticated user.
-     * @return ResponseEntity containing the created OrderDto.
+     * Admin orders are auto-approved, others are set to PENDING.
      */
     @PreAuthorize("hasAnyAuthority('admin:create', 'management:create')")
     @PostMapping("/create")
     public ResponseEntity<OrderDto> createOrder(
-           @Valid @RequestBody OrderCreationRequest request,
-            @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(
-                orderService.createOrder(request.getCategory(), request.getOrder(), user)
-        );
+            @Valid @RequestBody OrderCreationRequestDto request,
+            @AuthenticationPrincipal User user
+    ) {
+        OrderDto created = orderService.createOrder(request, user);
+        return ResponseEntity.ok(created);
     }
-    /**
-     * Get orders by MANAGER.
-     * Accessible by MANAGER role.
-     *
-     * @param user the authenticated user.
-     * @return ResponseEntity containing the list of OrderDto.
-     */
-   /* @PreAuthorize("hasAuthority('management:read')")
-    @GetMapping("/manager")
-    public ResponseEntity<List<OrderDto>> getOrdersByManager(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(orderService.getOrdersByManager(user));
-    }*/
 
     /**
-     * Get all orders.
-     * Accessible by ADMIN role.
-     *
-     * @return ResponseEntity containing the list of OrderDto.
+     * Fetch all orders.
+     * Restricted to admins only.
      */
     @PreAuthorize("hasAuthority('admin:read')")
     @GetMapping
     public ResponseEntity<List<OrderDto>> getAllOrders() {
-
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     /**
-     * Approve or reject an order.
-     * Accessible by ADMIN role.
-     *
-     * @param orderId the ID of the order to approve/reject.
-     * @param isApproved whether the order is approved.
-     * @return ResponseEntity containing the updated OrderDto.
+     * Approve or reject a pending order.
+     * Restricted to admins only.
      */
     @PreAuthorize("hasAuthority('admin:update')")
     @PutMapping("/{orderId}/approve")
     public ResponseEntity<OrderDto> approveOrRejectOrder(
             @PathVariable Long orderId,
-            @RequestParam boolean isApproved) {
+            @RequestParam boolean isApproved
+    ) {
         return ResponseEntity.ok(orderService.approveOrRejectOrder(orderId, isApproved));
     }
 
-
-
     /**
-     * Assign a supplier to an order.
-     * Accessible by ADMIN role.
-     *
-     * @param orderId the ID of the order.
-     * @param supplierId the ID of the supplier.
-     * @return ResponseEntity containing the updated OrderDto.
+     * Assign a supplier to an approved order.
+     * Restricted to admins only.
      */
     @PreAuthorize("hasAuthority('admin:update')")
     @PutMapping("/{orderId}/assign-supplier/{supplierId}")
     public ResponseEntity<OrderDto> assignSupplierToOrder(
             @PathVariable Long orderId,
-            @PathVariable Long supplierId) {
+            @PathVariable Long supplierId
+    ) {
         return ResponseEntity.ok(orderService.assignSupplierToOrder(orderId, supplierId));
     }
 }

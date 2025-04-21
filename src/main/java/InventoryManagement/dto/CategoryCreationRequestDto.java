@@ -1,6 +1,5 @@
 package InventoryManagement.dto;
 
-
 import lombok.*;
 
 @Getter
@@ -8,6 +7,8 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDto{
+public class CategoryCreationRequestDto {
+    private Long id;
     private String name;
+    private String description;
 }

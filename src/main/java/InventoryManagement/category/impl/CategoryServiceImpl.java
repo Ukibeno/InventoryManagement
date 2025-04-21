@@ -1,6 +1,7 @@
 package InventoryManagement.category.impl;
 
 
+import InventoryManagement.dto.CategoryCreationRequestDto;
 import InventoryManagement.repository.category.CategoryRepository;
 import InventoryManagement.category.CategoryService;
 import InventoryManagement.dto.CategoryDto;
@@ -34,19 +35,19 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto createCategory(CategoryDto categoryDto) {
-        Category category = categoryMapper.toEntity(categoryDto);
+    public CategoryDto createCategory(CategoryCreationRequestDto categoryCreationRequestDto) {
+        Category category = categoryMapper.toEntity(categoryCreationRequestDto);
         Category savedCategory = categoryRepository.save(category);
         return categoryMapper.toDto(savedCategory);
     }
 
     @Override
-    public CategoryDto updateCategory(Integer id, CategoryDto categoryDto) {
+    public CategoryDto updateCategory(Integer id, CategoryCreationRequestDto categoryCreationRequestDto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        category.setName(categoryDto.getName());
-        category.setDescription(categoryDto.getDescription());
+        category.setName(categoryCreationRequestDto.getName());
+        category.setDescription(categoryCreationRequestDto.getDescription());
 
         Category updatedCategory = categoryRepository.save(category);
         return categoryMapper.toDto(updatedCategory);

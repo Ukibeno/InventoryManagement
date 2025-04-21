@@ -3,6 +3,7 @@ package InventoryManagement.dto;
 
 import InventoryManagement.model.BaseEntity;
 import InventoryManagement.model.Role;
+import InventoryManagement.model.Status;
 import lombok.*;
 
 import java.util.List;
@@ -19,4 +20,5 @@ public class UserDto  {
     private String lastName;
     private String contact;
     private Role role;
+    private Status status;
 }

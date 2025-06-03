@@ -29,7 +29,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
 
-        // ❗ Prevent login if status != ACTIVE
         if (user.getRole().name().equalsIgnoreCase("SUPPLIER") && user.getStatus() != Status.ACTIVE) {
             throw new BadCredentialsException("Account pending approval by Admin.");
         }

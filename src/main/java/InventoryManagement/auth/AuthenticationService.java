@@ -1,17 +1,15 @@
 package InventoryManagement.auth;
 
 import InventoryManagement.config.CustomUserDetails;
+import InventoryManagement.config.CustomUserDetailsService;
 import InventoryManagement.config.JwtService;
-import InventoryManagement.dto.AdminSignupRequestDto;
+import InventoryManagement.dto.UserSignupRequestDto;
 import InventoryManagement.dto.SupplierSignupRequestDto;
 import InventoryManagement.exception.EmailAlreadyExistsException;
 import InventoryManagement.exception.ResourceNotFoundException;
 import InventoryManagement.mapper.SupplierMapper;
 import InventoryManagement.mapper.UserMapper;
-import InventoryManagement.model.Role;
-import InventoryManagement.model.Status;
-import InventoryManagement.model.Supplier;
-import InventoryManagement.model.User;
+import InventoryManagement.model.*;
 import InventoryManagement.repository.category.CategoryRepository;
 import InventoryManagement.repository.supplier.SupplierRepository;
 import InventoryManagement.repository.user.UserRepository;
@@ -46,14 +44,16 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
     private final SupplierMapper supplierMapper;
+    private final CustomUserDetailsService customUserDetailsService;
 
-    public AuthenticationResponse registerAdmin(AdminSignupRequestDto request) {
+
+    public AuthenticationResponse registerAdmin(UserSignupRequestDto request) {
         var user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStatus(Status.ACTIVE);
 
         if (user.getRole() == null) {
-            user.setRole(Role.ADMIN);
+            user.setRole(Role.MANAGER);
         }
 
         var savedUser = userRepository.save(user);
@@ -66,16 +66,16 @@ public class AuthenticationService {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailAlreadyExistsException("Email already exists: " + request.getEmail());
         }
-
-        // Map and prepare Supplier directly
+        // Map and prepare Supplier entity
         var supplier = (Supplier) supplierMapper.toEntity(request);
         supplier.setPassword(passwordEncoder.encode(request.getPassword()));
         supplier.setRole(Role.SUPPLIER);
         supplier.setStatus(Status.PENDING);
 
-        if (request.getCategoryCreationRequestDto() != null) {
-            var category = categoryRepository.findById(request.getCategoryCreationRequestDto().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + request.getCategoryCreationRequestDto().getId()));
+        // Set Category by ID if present
+        if (request.getCategoryId() != null) {
+            var category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + request.getCategoryId()));
             supplier.setCategory(category);
         }
 
@@ -84,14 +84,14 @@ public class AuthenticationService {
         return generateAuthenticationResponse(savedSupplier);
     }
 
+
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(request.getEmail());
+        User user = ((CustomUserDetails) userDetails).getUser();
         revokeAllUserTokens(user);
         return generateAuthenticationResponse(user);
     }
@@ -105,10 +105,8 @@ public class AuthenticationService {
         final String userEmail = jwtService.extractUsername(refreshToken);
 
         if (userEmail != null) {
-            var user = userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-            UserDetails userDetails = new CustomUserDetails(user);
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);
+            User user = ((CustomUserDetails) userDetails).getUser();
 
             if (jwtService.isTokenValid(refreshToken, userDetails)) {
                 var accessToken = jwtService.generateToken(userDetails);
@@ -124,6 +122,7 @@ public class AuthenticationService {
             }
         }
     }
+
     public boolean emailExists(String email) {
         return userRepository.findByEmail(email).isPresent();
     }

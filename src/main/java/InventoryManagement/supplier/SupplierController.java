@@ -1,5 +1,6 @@
 package InventoryManagement.supplier;
 
+import InventoryManagement.dto.ApiSuccessResponse;
 import InventoryManagement.dto.SupplierDto;
 import InventoryManagement.dto.SupplierSignupRequestDto;
 import jakarta.validation.Valid;
@@ -18,52 +19,89 @@ public class SupplierController {
 
     private final SupplierService supplierService;
 
-    // Admins and suppliers can view their own profile
-    @PreAuthorize("hasAnyAuthority('admin:read', 'supplier:read')")
-    @GetMapping("/{id}")
-    public ResponseEntity<SupplierDto> getSupplierById(@PathVariable Long id) {
-        SupplierDto supplier = supplierService.getSupplierById(id);
-        return ResponseEntity.ok(supplier);
+    // Admin and Supplier (for viewing profile)
+    @PreAuthorize("hasAnyAuthority('ADMIN_READ', 'SUPPLIER_READ')")
+    @GetMapping("/{supplierId}")
+    public ResponseEntity<ApiSuccessResponse<SupplierDto>> getSupplierById(@PathVariable Long supplierId) {
+        SupplierDto supplier = supplierService.getSupplierById(supplierId);
+        ApiSuccessResponse<SupplierDto> response = new ApiSuccessResponse<>(
+                true,
+                "Supplier fetched successfully",
+                supplier,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    // Supplier can update their own profile
-    @PreAuthorize("hasAuthority('supplier:update')")
-    @PutMapping("/{id}")
-    public ResponseEntity<SupplierDto> updateSupplier(@PathVariable Long id,
-                                                      @Valid @RequestBody SupplierSignupRequestDto supplierSignupRequestDto) {
-        SupplierDto updatedSupplier = supplierService.updateSupplier(id, supplierSignupRequestDto);
-        return ResponseEntity.ok(updatedSupplier);
+    // Supplier updates their own profile
+    @PreAuthorize("hasAuthority('SUPPLIER_UPDATE')")
+    @PutMapping("/{supplierId}")
+    public ResponseEntity<ApiSuccessResponse<SupplierDto>> updateSupplier(
+            @PathVariable Long supplierId,
+            @Valid @RequestBody SupplierSignupRequestDto requestDto
+    ) {
+        SupplierDto updatedSupplier = supplierService.updateSupplier(supplierId, requestDto);
+        ApiSuccessResponse<SupplierDto> response = new ApiSuccessResponse<>(
+                true,
+                "Supplier updated successfully",
+                updatedSupplier,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    // Admin only: list all suppliers
-    @PreAuthorize("hasAuthority('admin:read')")
+    @PreAuthorize("hasAuthority('ADMIN_READ')")
     @GetMapping
-    public ResponseEntity<List<SupplierDto>> getAllSuppliers() {
+    public ResponseEntity<ApiSuccessResponse<List<SupplierDto>>> getAllSuppliers() {
         List<SupplierDto> suppliers = supplierService.getAllSuppliers();
-        return ResponseEntity.ok(suppliers);
+        ApiSuccessResponse<List<SupplierDto>> response = new ApiSuccessResponse<>(
+                true,
+                "Suppliers fetched successfully",
+                suppliers,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    // Admin only: approve supplier
-    @PreAuthorize("hasAuthority('admin:update')")
-    @PostMapping("/{id}/approve")
-    public ResponseEntity<String> approveSupplier(@PathVariable Long id) {
-        supplierService.approveSupplier(id);
-        return ResponseEntity.ok("Supplier approved successfully.");
+    // Admin approves a supplier
+    @PreAuthorize("hasAuthority('ADMIN_UPDATE')")
+    @PutMapping("/{supplierId}/approve")
+    public ResponseEntity<ApiSuccessResponse<String>> approveSupplier(@PathVariable Long supplierId) {
+        supplierService.approveSupplier(supplierId);
+        ApiSuccessResponse<String> response = new ApiSuccessResponse<>(
+                true,
+                "Supplier approved successfully",
+                null,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    // Admin only: reject supplier
-    @PreAuthorize("hasAuthority('admin:update')")
-    @PostMapping("/{id}/reject")
-    public ResponseEntity<String> rejectSupplier(@PathVariable Long id) {
-        supplierService.rejectSupplier(id);
-        return ResponseEntity.ok("Supplier rejected successfully.");
+    // Admin rejects a supplier
+    @PreAuthorize("hasAuthority('ADMIN_UPDATE')")
+    @PutMapping("/{supplierId}/reject")
+    public ResponseEntity<ApiSuccessResponse<String>> rejectSupplier(@PathVariable Long supplierId) {
+        supplierService.rejectSupplier(supplierId);
+        ApiSuccessResponse<String> response = new ApiSuccessResponse<>(
+                true,
+                "Supplier rejected successfully",
+                null,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    // Admin only: delete supplier
-    @PreAuthorize("hasAuthority('admin:delete')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSupplier(@PathVariable Long id) {
-        supplierService.deleteSupplier(id);
-        return ResponseEntity.noContent().build();
+    // Admin deletes a supplier
+    @PreAuthorize("hasAuthority('ADMIN_DELETE')")
+    @DeleteMapping("/{supplierId}")
+    public ResponseEntity<ApiSuccessResponse<Void>> deleteSupplier(@PathVariable Long supplierId) {
+        supplierService.deleteSupplier(supplierId);
+        ApiSuccessResponse<Void> response = new ApiSuccessResponse<>(
+                true,
+                "Supplier deleted successfully",
+                null,
+                HttpStatus.NO_CONTENT.value()
+        );
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

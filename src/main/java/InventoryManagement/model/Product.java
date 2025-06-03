@@ -1,5 +1,6 @@
 package InventoryManagement.model;
 
+import jakarta.annotation.Resource;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,12 +10,16 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Product extends BaseEntity{
 
     @Column(nullable = false)
     private String name;
+
+    @Column(unique = true, nullable = false)
+    private String productCode;
 
     @Column(nullable = false)
     private String description;

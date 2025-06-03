@@ -1,6 +1,6 @@
 package InventoryManagement.mapper;
 
-import InventoryManagement.dto.AdminSignupRequestDto;
+import InventoryManagement.dto.UserSignupRequestDto;
 import InventoryManagement.dto.SupplierSignupRequestDto;
 import InventoryManagement.dto.UserDto;
 import InventoryManagement.model.User;
@@ -13,7 +13,7 @@ public interface UserMapper {
     @Mapping(source = "role", target = "role")
     UserDto toDto(User user);
 
-    User toEntity(AdminSignupRequestDto dto);
+    User toEntity(UserSignupRequestDto dto);
 
     @Mapping(target = "role", constant = "SUPPLIER") // force role to SUPPLIER when mapping SupplierSignupRequestDto
     User toEntity(SupplierSignupRequestDto dto);

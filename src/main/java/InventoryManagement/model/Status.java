@@ -1,12 +1,12 @@
 package InventoryManagement.model;
 
 public enum Status {
-    PENDING,      // Order created by the manager.
-    EDITED,    // Admin has edited the order
+    PENDING,
+    EDITED,
     APPROVED,
     REJECTED,
      ACTIVE,
 
     INACTIVE,
-    COMPLETED     // Order has been completed.
+    COMPLETED
 }

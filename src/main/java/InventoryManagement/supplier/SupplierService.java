@@ -12,8 +12,6 @@ public interface SupplierService {
     List<SupplierDto> getAllSuppliers();
     SupplierDto getSupplierById(Long id);
 
-   // SupplierDto createSupplier(SupplierSignupRequestDto supplierSignupRequestDto);
-
     SupplierDto updateSupplier(Long id, SupplierSignupRequestDto supplierSignupRequestDto);
 
     void approveSupplier(Long id);

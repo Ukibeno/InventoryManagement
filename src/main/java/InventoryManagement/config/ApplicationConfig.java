@@ -24,7 +24,6 @@ public class ApplicationConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
 
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

@@ -1,18 +1,14 @@
 package InventoryManagement.user.impl;
 
-import InventoryManagement.auth.AuthenticationResponse;
-import InventoryManagement.auth.AuthenticationService;
-import InventoryManagement.config.CustomUserDetails;
-import InventoryManagement.config.JwtService;
-import InventoryManagement.dto.AdminSignupRequestDto;
 import InventoryManagement.dto.UserDto;
+import InventoryManagement.exception.ResourceNotFoundException;
 import InventoryManagement.mapper.UserMapper;
-import InventoryManagement.model.Role;
+import InventoryManagement.model.Status;
 import InventoryManagement.model.User;
 import InventoryManagement.repository.user.UserRepository;
 import InventoryManagement.user.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +20,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
     private final UserMapper userMapper;
-
+    private final UserRepository userRepository;
 
     // Get all users
     @Override
@@ -58,6 +54,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found for id: " + id));
         repository.delete(user);
     }
+
 
     // Helper to update user fields
     private void updateUserFields(User user, UserDto userDto) {

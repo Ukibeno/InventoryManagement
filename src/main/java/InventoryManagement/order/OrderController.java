@@ -1,11 +1,13 @@
 package InventoryManagement.order;
 
-import InventoryManagement.dto.OrderCreationRequestDto;
-import InventoryManagement.dto.OrderDto;
+import InventoryManagement.dto.*;
+import InventoryManagement.dto.view.Views;
 import InventoryManagement.model.User;
 import InventoryManagement.order.OrderService;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,53 +22,81 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    /**
-     * Create a new order.
-     * Admin orders are auto-approved, others are set to PENDING.
-     */
-    @PreAuthorize("hasAnyAuthority('admin:create', 'management:create')")
-    @PostMapping("/create")
-    public ResponseEntity<OrderDto> createOrder(
+    @PreAuthorize("hasAnyAuthority('ADMIN_CREATE', 'MANAGEMENT_CREATE')")
+    @PostMapping
+    public ResponseEntity<ApiSuccessResponse<OrderDto>> createOrder(
             @Valid @RequestBody OrderCreationRequestDto request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal(expression = "user") User user
     ) {
         OrderDto created = orderService.createOrder(request, user);
-        return ResponseEntity.ok(created);
+        ApiSuccessResponse<OrderDto> response = new ApiSuccessResponse<>(
+                true,
+                "Order created successfully",
+                created,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Fetch all orders.
-     * Restricted to admins only.
-     */
-    @PreAuthorize("hasAuthority('admin:read')")
+    @PreAuthorize("hasAuthority('ADMIN_READ')")
     @GetMapping
-    public ResponseEntity<List<OrderDto>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
+    @JsonView(Views.AdminView.class)
+    public ResponseEntity<ApiSuccessResponse<List<OrderDto>>> getAllOrdersForAdmin() {
+        List<OrderDto> orders = orderService.getAllOrdersForAdmin();
+        ApiSuccessResponse<List<OrderDto>> response = new ApiSuccessResponse<>(
+                true,
+                "Orders fetched successfully",
+                orders,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Approve or reject a pending order.
-     * Restricted to admins only.
-     */
-    @PreAuthorize("hasAuthority('admin:update')")
-    @PutMapping("/{orderId}/approve")
-    public ResponseEntity<OrderDto> approveOrRejectOrder(
-            @PathVariable Long orderId,
-            @RequestParam boolean isApproved
+    @PreAuthorize("hasAuthority('MANAGEMENT_READ')")
+    @GetMapping("/my-orders")
+    @JsonView(Views.ManagerView.class)
+    public ResponseEntity<ApiSuccessResponse<List<OrderManagerViewDto>>> getOrdersForManager(
+            @AuthenticationPrincipal User user
     ) {
-        return ResponseEntity.ok(orderService.approveOrRejectOrder(orderId, isApproved));
+        List<OrderManagerViewDto> orders = orderService.getAllOrdersForManager(user);
+        ApiSuccessResponse<List<OrderManagerViewDto>> response = new ApiSuccessResponse<>(
+                true,
+                "Manager orders fetched successfully",
+                orders,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Assign a supplier to an approved order.
-     * Restricted to admins only.
-     */
-    @PreAuthorize("hasAuthority('admin:update')")
-    @PutMapping("/{orderId}/assign-supplier/{supplierId}")
-    public ResponseEntity<OrderDto> assignSupplierToOrder(
+    @PreAuthorize("hasAuthority('ADMIN_UPDATE')")
+    @PutMapping("/{orderId}/review")
+    public ResponseEntity<ApiSuccessResponse<OrderDto>> reviewOrder(
             @PathVariable Long orderId,
-            @PathVariable Long supplierId
+            @Valid @RequestBody OrderReviewRequestDto reviewRequest
     ) {
-        return ResponseEntity.ok(orderService.assignSupplierToOrder(orderId, supplierId));
+        OrderDto updatedOrder = orderService.reviewOrder(orderId, reviewRequest);
+        ApiSuccessResponse<OrderDto> response = new ApiSuccessResponse<>(
+                true,
+                "Order reviewed successfully",
+                updatedOrder,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN_UPDATE')")
+    @PutMapping("/{orderId}/assign-supplier")
+    public ResponseEntity<ApiSuccessResponse<OrderDto>> assignSupplier(
+            @PathVariable Long orderId,
+            @Valid @RequestBody OrderAssignSupplierRequestDto assignSupplierRequest
+    ) {
+        OrderDto updatedOrder = orderService.assignSupplier(orderId, assignSupplierRequest);
+        ApiSuccessResponse<OrderDto> response = new ApiSuccessResponse<>(
+                true,
+                "Supplier assigned successfully",
+                updatedOrder,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 }

@@ -2,12 +2,9 @@
 package InventoryManagement.dto;
 
 
-import InventoryManagement.model.BaseEntity;
 import InventoryManagement.model.Role;
 import InventoryManagement.model.Status;
 import lombok.*;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -15,11 +12,12 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class SupplierDto {
+  private Long id;
   private String firstName;
   private String lastName;
   private String email;
   private Role role;
-  private CategoryDto categoryDto;
+  private CategoryDto category;
   private Status status;
 }
 

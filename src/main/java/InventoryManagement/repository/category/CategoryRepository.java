@@ -6,7 +6,7 @@ import java.util.Optional;
 import InventoryManagement.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CategoryRepository extends JpaRepository<Category, Integer> {
+public interface CategoryRepository extends JpaRepository<Category, Long> {
     // Find category by ID
     Optional<Category> findById(Long id);
 

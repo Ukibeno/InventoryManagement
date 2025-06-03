@@ -2,9 +2,7 @@ package InventoryManagement;
 
 import InventoryManagement.auth.AuthenticationResponse;
 import InventoryManagement.auth.AuthenticationService;
-import InventoryManagement.dto.AdminSignupRequestDto;
-import InventoryManagement.dto.CategoryCreationRequestDto;
-import InventoryManagement.dto.CategoryDto;
+import InventoryManagement.dto.UserSignupRequestDto;
 import InventoryManagement.dto.SupplierSignupRequestDto;
 import InventoryManagement.model.Category;
 import InventoryManagement.model.Status;
@@ -27,7 +25,6 @@ public class ManagementSystemApplication {
 	}
 
 	@Bean
-	@Profile("!test")
 	public CommandLineRunner commandLineRunner(AuthenticationService authenticationService, CategoryRepository categoryRepository) {
 		return args -> {
 			// Create and save default category (if not exists)
@@ -41,14 +38,13 @@ public class ManagementSystemApplication {
 
 			// Admin
 			if (!authenticationService.emailExists("admin@mail.com")) {
-				AdminSignupRequestDto admin = AdminSignupRequestDto.builder()
+				UserSignupRequestDto admin = UserSignupRequestDto.builder()
 						.firstName("Admin")
 						.lastName("Admin")
 						.email("admin@mail.com")
 						.password("password")
 						.contact("09012345678")
 						.address("no 244")
-						.status(Status.ACTIVE)
 						.role(ADMIN)
 						.build();
 				AuthenticationResponse adminResponse = authenticationService.registerAdmin(admin);
@@ -57,16 +53,16 @@ public class ManagementSystemApplication {
 
 			// Manager
 			if (!authenticationService.emailExists("manager@mail.com")) {
-				AdminSignupRequestDto manager = AdminSignupRequestDto.builder()
+				UserSignupRequestDto manager = UserSignupRequestDto.builder()
 						.firstName("Manager")
 						.lastName("Manager")
 						.email("manager@mail.com")
 						.password("password")
 						.contact("09087654321")
 						.address("Manager Address")
-						.status(Status.ACTIVE)
 						.role(MANAGER)
 						.build();
+				// Assuming registerManager exists, otherwise replace with correct method
 				AuthenticationResponse managerResponse = authenticationService.registerAdmin(manager);
 				System.out.println("Manager token: " + managerResponse.getAccessToken());
 			}
@@ -74,18 +70,13 @@ public class ManagementSystemApplication {
 			// Supplier
 			if (!authenticationService.emailExists("kaykey@mail.com")) {
 				SupplierSignupRequestDto supplier = SupplierSignupRequestDto.builder()
-						.firstName("kayKey")
+						.firstName("KayKey")
 						.lastName("Enterprise")
 						.email("kaykey@mail.com")
 						.password("password")
 						.contact("09065971889")
 						.address("No 40 Wale Street")
-						.status(Status.ACTIVE)
-						.categoryCreationRequestDto(CategoryCreationRequestDto.builder()
-								.id(electronicsCategory.getId())
-								.name(electronicsCategory.getName())
-								.description(electronicsCategory.getDescription())
-								.build())
+						.categoryId(electronicsCategory.getId())  // use categoryId only
 						.build();
 				AuthenticationResponse supplierResponse = authenticationService.registerSupplier(supplier);
 				System.out.println("Supplier token: " + supplierResponse.getAccessToken());

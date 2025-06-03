@@ -1,14 +1,14 @@
 package InventoryManagement.user;
 
-import InventoryManagement.auth.AuthenticationRequest;
 import InventoryManagement.auth.AuthenticationResponse;
 import InventoryManagement.auth.AuthenticationService;
-import InventoryManagement.dto.AdminSignupRequestDto;
+import InventoryManagement.dto.ApiSuccessResponse;
+import InventoryManagement.dto.UserSignupRequestDto;
 import InventoryManagement.dto.UserDto;
-import io.swagger.v3.oas.annotations.Hidden;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import InventoryManagement.model.Status;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,70 +19,77 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class UserController {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
 
-    @PreAuthorize("hasAuthority('admin:create')")
+    @PreAuthorize("hasAuthority('ADMIN_CREATE')")
     @PostMapping("/register-user")
-    public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody AdminSignupRequestDto request
+    public ResponseEntity<ApiSuccessResponse<AuthenticationResponse>> register(
+           @Valid @RequestBody UserSignupRequestDto request
     ) {
-        return ResponseEntity.ok(authenticationService.registerAdmin(request));
+        AuthenticationResponse authResponse = authenticationService.registerAdmin(request);
+        ApiSuccessResponse<AuthenticationResponse> response = new ApiSuccessResponse<>(
+                true,
+                "Admin registered successfully",
+                authResponse,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('admin:create')")
-    @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest request
-    ) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+    @PreAuthorize("hasAuthority('ADMIN_READ')")
+    @GetMapping("")
+    public ResponseEntity<ApiSuccessResponse<List<UserDto>>> getAllUsers() {
+        List<UserDto> users = userService.getAllUsers();
+        ApiSuccessResponse<List<UserDto>> response = new ApiSuccessResponse<>(
+                true,
+                "Users fetched successfully",
+                users,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('admin:create')")
-    @PostMapping("/refresh-token")
-    public void refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws IOException {
-        authenticationService.refreshToken(request, response);
-    }
-    /**
-     * Get all users.
-     * Accessible by ADMIN with read authority.
-     */
-    @PreAuthorize("hasAuthority('admin:read')")
-    @GetMapping
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-
-        return ResponseEntity.ok(userService.getAllUsers());
-    }
-
-    @PreAuthorize("hasAuthority('admin:read')")
+    @PreAuthorize("hasAuthority('ADMIN_READ')")
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<ApiSuccessResponse<UserDto>> getUserById(@PathVariable Long id) {
+        UserDto user = userService.getUserById(id);
+        ApiSuccessResponse<UserDto> response = new ApiSuccessResponse<>(
+                true,
+                "User fetched successfully",
+                user,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Update user.
-     * Accessible by ADMIN with update authority.
-     */
-    @PreAuthorize("hasAuthority('admin:update')")
+    @PreAuthorize("hasAuthority('ADMIN_UPDATE')")
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        return ResponseEntity.ok(userService.updateUser(id, userDto));
+    public ResponseEntity<ApiSuccessResponse<UserDto>> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        UserDto updatedUser = userService.updateUser(id, userDto);
+        ApiSuccessResponse<UserDto> response = new ApiSuccessResponse<>(
+                true,
+                "User updated successfully",
+                updatedUser,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Delete user.
-     * Accessible by ADMIN with delete authority.
-     */
-    @PreAuthorize("hasAuthority('admin:delete')")
+    @PreAuthorize("hasAuthority('ADMIN_DELETE')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<ApiSuccessResponse<Void>> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+        ApiSuccessResponse<Void> response = new ApiSuccessResponse<>(
+                true,
+                "User deleted successfully",
+                null,
+                HttpStatus.NO_CONTENT.value()
+        );
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
+
 }

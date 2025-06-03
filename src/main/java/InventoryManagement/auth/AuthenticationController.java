@@ -1,11 +1,12 @@
 package InventoryManagement.auth;
 
-import InventoryManagement.dto.AdminSignupRequestDto;
+import InventoryManagement.dto.ApiSuccessResponse;
 import InventoryManagement.dto.SupplierSignupRequestDto;
-import InventoryManagement.dto.UserDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,18 +22,32 @@ public class AuthenticationController {
 
     private final AuthenticationService service;
 
-
-    @PostMapping("/register-supplier")
-    public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody SupplierSignupRequestDto request
+    @PostMapping("/signup")
+    public ResponseEntity<ApiSuccessResponse<AuthenticationResponse>> register(
+          @Valid @RequestBody SupplierSignupRequestDto request
     ) {
-        return ResponseEntity.ok(service.registerSupplier(request));
+        var authResponse = service.registerSupplier(request);
+        var response = new ApiSuccessResponse<>(
+                true,
+                "Supplier registered successfully",
+                authResponse,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
+
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest request
+    public ResponseEntity<ApiSuccessResponse<AuthenticationResponse>> authenticate(
+         @Valid  @RequestBody AuthenticationRequest request
     ) {
-        return ResponseEntity.ok(service.authenticate(request));
+        var authResponse = service.authenticate(request);
+        var response = new ApiSuccessResponse<>(
+                true,
+                "Authentication successful",
+                authResponse,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/refresh-token")
@@ -42,6 +57,4 @@ public class AuthenticationController {
     ) throws IOException {
         service.refreshToken(request, response);
     }
-
-
 }

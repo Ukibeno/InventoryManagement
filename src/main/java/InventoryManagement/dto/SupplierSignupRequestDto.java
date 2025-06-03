@@ -1,8 +1,8 @@
 package InventoryManagement.dto;
 
-import InventoryManagement.model.Status;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -11,21 +11,26 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class SupplierSignupRequestDto {
-    @NotBlank
+
+    @NotBlank(message = "First Name is required")
     private String firstName;
-    @NotBlank
+
+    @NotBlank(message = "Last Name is required")
     private String lastName;
-    @Email
-    @NotBlank
+
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is required")
     private String email;
-    @NotBlank
+
+    @NotBlank(message = "Password is required")
     private String password;
-    @NotBlank
+
+    @NotBlank(message = "Contact is required")
     private String contact;
-    @NotBlank
+
+    @NotBlank(message = "Address is required")
     private String address;
-    @NotBlank
-    private Status status;
-    @NotBlank
-    private CategoryCreationRequestDto categoryCreationRequestDto;
+
+    @NotNull(message = "Category ID is required")
+    private Long categoryId;
 }

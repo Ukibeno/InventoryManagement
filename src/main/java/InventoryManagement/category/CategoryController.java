@@ -3,7 +3,10 @@ package InventoryManagement.category;
 import InventoryManagement.dto.CategoryCreationRequestDto;
 import InventoryManagement.dto.CategoryDto;
 import InventoryManagement.category.CategoryService;
+import InventoryManagement.dto.ApiSuccessResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,46 +20,68 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @PreAuthorize("hasAnyAuthority('admin:read', 'management:read')")
+    @PreAuthorize("hasAnyAuthority('ADMIN_READ', 'MANAGEMENT_READ')")
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getAllCategories() {
+    public ResponseEntity<ApiSuccessResponse<List<CategoryDto>>> getAllCategories() {
         List<CategoryDto> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(categories);
+        ApiSuccessResponse<List<CategoryDto>> response = new ApiSuccessResponse<>(
+                true,
+                "Categories fetched successfully",
+                categories,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyAuthority('admin:read', 'management:read')")
+    @PreAuthorize("hasAnyAuthority('ADMIN_READ', 'MANAGEMENT_READ')")
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Integer id) {
+    public ResponseEntity<ApiSuccessResponse<CategoryDto>> getCategoryById(@PathVariable Long id) {
         CategoryDto category = categoryService.getCategoryById(id);
-        return ResponseEntity.ok(category);
+        ApiSuccessResponse<CategoryDto> response = new ApiSuccessResponse<>(
+                true,
+                "Category fetched successfully",
+                category,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('admin:create')")
+    @PreAuthorize("hasAuthority('ADMIN_CREATE')")
     @PostMapping
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryCreationRequestDto categoryCreationRequestDto) {
-        CategoryDto createdCategory = categoryService.createCategory(categoryCreationRequestDto);
-        return ResponseEntity.status(201).body(createdCategory);
+    public ResponseEntity<ApiSuccessResponse<CategoryDto>> createCategory(@Valid @RequestBody CategoryCreationRequestDto dto) {
+        CategoryDto createdCategory = categoryService.createCategory(dto);
+        ApiSuccessResponse<CategoryDto> response = new ApiSuccessResponse<>(
+                true,
+                "Category created successfully",
+                createdCategory,
+                HttpStatus.CREATED.value()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
-    @PreAuthorize("hasAuthority('admin:update')")
+    @PreAuthorize("hasAuthority('ADMIN_UPDATE')")
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Integer id, @RequestBody CategoryCreationRequestDto categoryCreationRequestDto) {
-        CategoryDto updatedCategory = categoryService.updateCategory(id, categoryCreationRequestDto);
-        return ResponseEntity.ok(updatedCategory);
+    public ResponseEntity<ApiSuccessResponse<CategoryDto>> updateCategory(@PathVariable Long id, @RequestBody CategoryCreationRequestDto dto) {
+        CategoryDto updatedCategory = categoryService.updateCategory(id, dto);
+        ApiSuccessResponse<CategoryDto> response = new ApiSuccessResponse<>(
+                true,
+                "Category updated successfully",
+                updatedCategory,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Delete a category by ID.
-     * Accessible only by ADMIN role.
-     *
-     * @param id the ID of the category to delete.
-     * @return ResponseEntity with a success message.
-     */
-    @PreAuthorize("hasAuthority('admin:delete')")
+    @PreAuthorize("hasAuthority('ADMIN_DELETE')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Integer id) {
+    public ResponseEntity<ApiSuccessResponse<Void>> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.ok("Category deleted successfully.");
+        ApiSuccessResponse<Void> response = new ApiSuccessResponse<>(
+                true,
+                "Category deleted successfully",
+                null,
+                HttpStatus.OK.value()
+        );
+        return ResponseEntity.ok(response);
     }
 }

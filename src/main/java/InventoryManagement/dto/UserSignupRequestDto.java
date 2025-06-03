@@ -2,9 +2,6 @@ package InventoryManagement.dto;
 
 import InventoryManagement.model.Role;
 import InventoryManagement.model.Status;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -14,23 +11,26 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminSignupRequestDto {
-    @NotBlank
+public class UserSignupRequestDto {
+    @NotBlank(message="First Name is required")
     private String firstName;
-    @NotBlank
-    private String lastName;
-    @Email
-    @NotBlank
-    private String email;
-    @NotBlank
-    private String password;
-    @NotBlank
-    private String contact;
-    @NotBlank
-    private String address;
-    @NotBlank
-    private Status status;
-    @NotBlank
-    private Role role;
 
+    @NotBlank(message="last Name is required")
+    private String lastName;
+
+    @Email
+    @NotBlank(message="Email is required")
+    private String email;
+
+    @NotBlank(message="password is required")
+    private String password;
+
+    @NotBlank(message = "contact is required")
+    private String contact;
+
+    @NotBlank(message="address is required")
+    private String address;
+
+    @NotBlank(message ="role is required!")
+    private Role role;
 }

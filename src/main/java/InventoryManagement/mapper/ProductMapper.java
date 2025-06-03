@@ -10,10 +10,13 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
- @Mapping(source = "category", target = "categoryDto")
+
+ // Map Product to ProductDto, category field mapped as is (Category -> CategoryDto assumed)
+ @Mapping(source = "category", target = "category")
  ProductDto productToDto(Product product);
 
- @Mapping(source = "categoryDto", target = "category")
+ // For creating/updating Product entity from ProductCreationRequestDto, ignore category here
+ // because category needs to be set manually in service layer after fetching from DB
  Product productDtoToEntity(ProductCreationRequestDto productCreationRequestDto);
-
 }
+

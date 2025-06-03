@@ -2,9 +2,9 @@ package InventoryManagement.supplier.supplierimpl;
 
 import InventoryManagement.dto.SupplierDto;
 import InventoryManagement.dto.SupplierSignupRequestDto;
+import InventoryManagement.exception.ResourceNotFoundException;
 import InventoryManagement.mapper.SupplierMapper;
 import InventoryManagement.model.Category;
-import InventoryManagement.model.Role;
 import InventoryManagement.model.Status;
 import InventoryManagement.model.Supplier;
 import InventoryManagement.repository.category.CategoryRepository;
@@ -35,51 +35,54 @@ public class SupplierServiceImpl implements SupplierService {
                 .map(supplierMapper::toDto)
                 .toList();
     }
+
     @Override
     @Transactional(readOnly = true)
-    public SupplierDto getSupplierById(Long id) {
-        return supplierMapper.toDto(findSupplierById(id));
+    public SupplierDto getSupplierById(Long supplierId) {
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found for id: " + supplierId));
+        return supplierMapper.toDto(supplier);
     }
 
     @Override
-    public SupplierDto updateSupplier(Long id, SupplierSignupRequestDto dto) {
-        Supplier supplier = findSupplierById(id);
-        Category category = findCategoryById(dto.getCategoryCreationRequestDto().getId());
+    public SupplierDto updateSupplier(Long supplierId, SupplierSignupRequestDto dto) {
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found for id: " + supplierId));
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + dto.getCategoryId()));
 
         supplier.setFirstName(dto.getFirstName());
         supplier.setLastName(dto.getLastName());
         supplier.setEmail(dto.getEmail());
+        supplier.setContact(dto.getContact());
+        supplier.setAddress(dto.getAddress());
         supplier.setCategory(category);
 
         return supplierMapper.toDto(supplierRepository.save(supplier));
     }
 
-    public void approveSupplier(Long id) {
-        Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+    @Override
+    public void approveSupplier(Long supplierId) {
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found for id: " + supplierId));
         supplier.setStatus(Status.ACTIVE);
         supplierRepository.save(supplier);
     }
 
-    public void rejectSupplier(Long id) {
-        Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+    @Override
+    public void rejectSupplier(Long supplierId) {
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found for id: " + supplierId));
         supplier.setStatus(Status.REJECTED);
         supplierRepository.save(supplier);
     }
+
     @Override
     public void deleteSupplier(Long supplierId) {
-        Supplier supplier = findSupplierById(supplierId);
-        supplierRepository.delete(supplier);
-    }
-
-    private Supplier findSupplierById(Long id) {
-        return supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found for id: " + id));
-    }
-
-    private Category findCategoryById(Long id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found for id: " + id));
+        if (!supplierRepository.existsById(supplierId)) {
+            throw new ResourceNotFoundException("Supplier not found for id: " + supplierId);
+        }
+        supplierRepository.deleteById(supplierId);
     }
 }

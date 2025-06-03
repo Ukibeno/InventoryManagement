@@ -20,6 +20,7 @@ public class OrderItem extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal price;
 
+    private String productCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
@@ -29,15 +30,12 @@ public class OrderItem extends BaseEntity {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    private String productCode;
-
     // Constructor to map from DTO and Order
     public OrderItem(OrderItemDto itemDto, Order order, Product product) {
         this.quantity = itemDto.getQuantity();
         this.price = itemDto.getPrice();
-/*
-        this.product = product; // Set Product from the fetched Product entity
-*/
+        this.product = product;
+        this.productCode = product.getProductCode();  // fix here
         this.order = order;
     }
 

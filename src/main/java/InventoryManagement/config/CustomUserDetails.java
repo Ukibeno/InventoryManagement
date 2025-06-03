@@ -5,8 +5,12 @@ import InventoryManagement.model.Status;
 import InventoryManagement.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class CustomUserDetails implements UserDetails {
@@ -24,7 +28,20 @@ public class CustomUserDetails implements UserDetails {
     // Delegates to your User model to provide authorities
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getRole().getAuthorities();
+
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        // Add role with ROLE_ prefix
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+
+        // Add all permissions as authorities
+        authorities.addAll(
+                user.getRole().getPermissions().stream()
+                        .map(permission -> new SimpleGrantedAuthority(permission.getPermission()))
+                        .collect(Collectors.toSet())
+        );
+
+        return authorities;
     }
 
     @Override

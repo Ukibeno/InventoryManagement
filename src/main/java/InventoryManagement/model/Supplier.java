@@ -17,7 +17,5 @@ public class Supplier extends User{
     @JoinColumn(name = "category_id")
     private Category category;
 
-   /* @OneToMany(mappedBy = "supplier")
-    private List<Order> orders;*/
 
 }
